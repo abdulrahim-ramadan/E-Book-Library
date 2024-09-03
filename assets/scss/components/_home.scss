@@ -1,0 +1,37 @@
+/*=============== HOME ===============*/
+.home{
+   &__swiper{
+      margin: initial;
+   }
+   &__container{
+      padding-top: 2rem;
+      row-gap: 2.5rem;
+   }
+   &__data{
+      text-align: center;
+   }
+   &__title{
+      font-size: var(--biggest-font-size);
+      margin-bottom: 1rem;
+   }
+   &__description{
+      margin-bottom: 2rem;
+   }
+   &__images{
+      display: grid;
+   }
+   &__article,
+   &__img{
+      width: 220px;
+      transition: scale .4s;
+   }
+   &__article{
+      scale: .8;
+   }
+}
+
+/* Swiper class */
+.swiper-slide-active,
+.swiper-slide-duplicate-active{
+   scale: 1;
+}

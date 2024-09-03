@@ -1,0 +1,74 @@
+/*=============== FEATURED ===============*/
+.featured{
+   &__card{
+      position: relative;
+      text-align: center;
+      background-color: var(--container-color);
+      padding: 2rem;
+      overflow: hidden;
+      border: 2px solid var(--border-color);
+      transition: border .4s, background-color .4s;
+   }
+   &__img{
+      width: 150px;
+      margin: 0 auto .75rem;
+   }
+   &__title{
+      font-size: var(--h2-font-size);
+      margin-bottom: .5rem;
+   }
+   &__prices{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: .75rem;
+      margin-bottom: 1.25rem;
+   }
+   &__discount{
+      color: var(--title-color);
+   }
+   &__price{
+      font-size: var(--small-font-size);
+      text-decoration: line-through;
+   }
+   &__card .button{
+      cursor: pointer;
+   }
+   &__actions{
+      display: inline-flex;
+      flex-direction: column;
+      row-gap: .75rem;
+      position: absolute;
+      top: 2rem;
+      right: -1.5rem;
+      transition: right .4s;
+
+      & button{
+         background: none;
+         font-size: 1.25rem;
+         color: var(--first-color);
+         cursor: pointer;
+      }
+   }
+   &__card:hover &__actions{
+      right: 1.5rem;
+   }
+}
+
+/* Swiper class */
+.swiper-button-prev::after,
+.swiper-button-next::after{
+   content: '';
+}
+
+.swiper-button-prev,
+.swiper-button-next{
+   width: initial;
+   height: initial;
+   background-color: var(--container-color);
+   border: 2px solid var(--border-color);
+   padding: .5rem;
+   font-size: 1.5rem;
+   color: var(--first-color);
+   transition: border .4s, background-color .4s;
+}

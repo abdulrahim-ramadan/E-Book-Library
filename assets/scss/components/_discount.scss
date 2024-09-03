@@ -1,0 +1,29 @@
+/*=============== DISCOUNT ===============*/
+.discount{
+   &__container{
+      row-gap: 3.5rem;
+   }
+   &__data{
+      text-align: center;
+   }
+   &__title{
+      margin-bottom: 1rem;
+   }
+   &__description{
+      margin-bottom: 2rem;
+   }
+   &__images{
+      display: flex;
+      justify-content: center;
+   }
+   &__img-1,
+   &__img-2{
+      width: 170px;
+   }
+   &__img-1{
+      transform: translateX(1rem) rotate(-10deg);
+   }
+   &__img-2{
+      transform: translateX(-1rem) rotate(10deg);
+   }
+}

@@ -1,0 +1,41 @@
+/*=============== JOIN ===============*/
+.join{
+   &__container{
+      position: relative;
+      padding-block: 3rem;
+   }
+   &__bg{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+   }
+   &__data{
+      position: relative;
+   }
+   &__title{
+      color: var(--white-color);
+
+   }
+   &__form{
+      display: grid;
+      row-gap: 1rem;
+   }
+   &__input{
+      padding: 1.25rem 1rem;
+      background-color: var(--body-color);
+      color: var(--title-color);
+      transition: background-color .4s;
+
+      &::placeholder{
+         color: var(--text-color);
+      }
+   }
+   &__button{
+      padding-block: 1.25rem;
+      cursor: pointer;
+   }
+}

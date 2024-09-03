@@ -1,0 +1,20 @@
+/*=============== SERVICES ===============*/
+.services{
+   &__container{
+      row-gap: 3rem;
+   }
+   &__card{
+      text-align: center;
+
+      & i{
+         display: block;
+         font-size: 3rem;
+         color: var(--first-color);
+         margin-bottom: 1rem;
+      }
+   }
+   &__title{
+      font-size: var(--h3-font-size);
+      margin-bottom: .5rem;
+   }
+}
