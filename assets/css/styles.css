@@ -1086,3 +1086,47 @@ body.dark-theme {
     width: 290px;
   }
 }
+
+
+
+
+
+
+body{
+  font-family: 'Poppins', sans-serif;
+}
+
+.banner-title {
+  font-size: 60px;
+}
+
+.feature-card:hover{
+  -webkit-box-shadow: 9px 8px 13px 0px rgba(0,0,0,0.75);
+-moz-box-shadow: 9px 8px 13px 0px rgba(0,0,0,0.75);
+box-shadow: 9px 8px 13px 0px rgba(0,0,0,0.75);
+}
+
+.card{
+  transition: 0,3s;
+}
+
+.card:hover{
+  margin-top: -15px;
+}
+
+.banner-img img{
+-webkit-filter: blur(3px);
+filter: blur(3px);
+-webkit-transition: .3s ease-in-out;
+transition: .3s ease-in-out;
+}
+
+.banner-img:hover img{
+  -webkit-filter: blur(0);
+filter: blur(0);
+}
+
+
+
+
+
