@@ -245,59 +245,32 @@ class PDFViewer {
         const book = $('#book');
         book.empty();
         
-        // Calculate proper dimensions
-        const containerWidth = book.width();
-        const pageWidth = Math.floor(containerWidth / 2); // Each page takes half the container width
-        
-        // Pre-render all pages first
-        await this.preRenderAllPages();
-        
         // Create empty pages with proper structure
         for (let i = 1; i <= this.currentPDF.numPages; i++) {
-            const pageWrapper = $('<div/>', {
-                'class': 'page-wrapper',
-                'data-page-number': i,
-                'style': `width: ${pageWidth}px; transform-origin: center center;`
-            });
-            
-            const flipContainer = $('<div/>', {
-                'class': 'flip-container',
-                'style': 'transform-origin: center center;'
+            const pageDiv = $('<div/>', {
+                'class': 'page-wrapper loading',
+                'data-page-number': i
             });
             
             const contentDiv = $('<div/>', {
-                'class': 'page-content',
-                'style': 'transform: translateZ(0); opacity: 0; transform-origin: center center;'
+                'class': 'page-content'
+            });
+
+            // Add corner for page turning
+            const cornerDiv = $('<div/>', {
+                'class': 'page-corner',
+                'data-corner': i % 2 === 0 ? 'left' : 'right'
             });
             
-            // Add the pre-rendered content
-            if (this.pageContents.has(i)) {
-                const canvas = this.pageContents.get(i);
-                canvas.style.transform = 'translateZ(0)';
-                canvas.style.transformOrigin = 'center center';
-                contentDiv.append(canvas);
-                setTimeout(() => {
-                    contentDiv.css('opacity', '1');
-                }, 50);
-            }
-            
-            // Add shadow elements for page flip effect
-            const shadowLeft = $('<div/>', { 'class': 'shadow-left' });
-            const shadowRight = $('<div/>', { 'class': 'shadow-right' });
-            
-            contentDiv.append(shadowLeft).append(shadowRight);
-            flipContainer.append(contentDiv);
-            pageWrapper.append(flipContainer);
-            book.append(pageWrapper);
+            contentDiv.append('<div class="spinner"></div>');
+            contentDiv.append(cornerDiv);
+            pageDiv.append(contentDiv);
+            book.append(pageDiv);
         }
-
-        // Add hard cover effect to first and last pages
-        book.find('.page-wrapper:first').addClass('first hard');
-        book.find('.page-wrapper:last').addClass('last hard');
 
         // Initialize Turn.js with enhanced options
         const options = {
-            width: containerWidth,
+            width: book.width(),
             height: book.height(),
             autoCenter: true,
             gradients: true,
@@ -306,72 +279,127 @@ class PDFViewer {
             duration: 600,
             elevation: 50,
             pages: this.currentPDF.numPages,
-            direction: 'rtl',
-            interactive: true,
-            hoverAreaSize: 100, // Size of the corner hover area
-            dragArea: true, // Enable drag area for page turning
             when: {
                 start: (event, pageObject) => {
-                    this.isAnimating = true;
-                    const book = $(event.target);
-                    const currentView = book.turn('view');
-                    currentView.forEach(pageNum => {
-                        if (pageNum) {
-                            const pageEl = book.find(`.page-wrapper[data-page-number="${pageNum}"]`);
-                            pageEl.addClass('turning');
-                            const content = pageEl.find('.page-content');
-                            content.css({
-                                'transform': 'translateZ(0)',
-                                'transform-origin': 'center center'
-                            });
-                        }
-                    });
+                    if (pageObject.next) {
+                        this.preloadAdjacentPages(pageObject.next);
+                    }
                 },
-                turning: (event, page, view) => {
+                turning: async (event, page, view) => {
                     const book = $(event.target);
-                    this.updateShadowEffects(book, page);
-                    
-                    view.forEach(pageNum => {
-                        if (pageNum) {
-                            const content = book.find(`.page-wrapper[data-page-number="${pageNum}"] .page-content`);
-                            content.css({
-                                'transform': 'translateZ(0)',
-                                'transform-origin': 'center center'
-                            });
-                        }
+                    const nextView = this.getPageView(page);
+                    const unloadedPages = nextView.filter(pageNum => {
+                        const pageElement = book.find(`.page-wrapper[data-page-number="${pageNum}"]`);
+                        return pageElement.hasClass('loading');
                     });
+
+                    if (unloadedPages.length > 0) {
+                        event.preventDefault();
+                        await this.preloadAdjacentPages(page);
+                        if (page === book.turn('page')) {
+                            book.turn('page', page);
+                        }
+                    }
                 },
-                turned: (event, page, view) => {
-                    this.isAnimating = false;
+                turned: (event, page) => {
                     this.updatePageInfo(page);
-                    const book = $(event.target);
-                    book.find('.page-wrapper.turning').removeClass('turning');
-                    
-                    view.forEach(pageNum => {
-                        if (pageNum) {
-                            const content = book.find(`.page-wrapper[data-page-number="${pageNum}"] .page-content`);
-                            content.css({
-                                'transform': 'translateZ(0)',
-                                'transform-origin': 'center center'
-                            });
-                        }
-                    });
+                    this.preloadAdjacentPages(page);
                 }
             }
         };
 
         book.turn(options);
 
-        // Add touch and mouse interaction handlers
-        this.initializeInteraction(book);
+        // Initialize the corner drag interaction
+        this.initCornerDrag(book);
 
         try {
+            const initialPages = this.getPageView(1);
+            await Promise.all(initialPages.map(pageNum => this.addPage(pageNum)));
             book.turn('page', 1);
-            this.hideLoading();
         } catch (error) {
-            console.error('Error initializing book:', error);
+            console.error('Error loading initial pages:', error);
             this.hideLoading();
         }
+    }
+
+    initCornerDrag(book) {
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentPage = null;
+
+        // Direct corner click/touch handling
+        book.on('mousedown touchstart', '.page-corner', function(e) {
+            e.preventDefault();
+            const touch = e.type === 'touchstart' ? e.touches[0] : e;
+            isDragging = true;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            currentPage = $(this).closest('.page-wrapper');
+            currentPage.addClass('dragging');
+        });
+
+        // Drag handling
+        $(document).on('mousemove touchmove', function(e) {
+            if (!isDragging || !currentPage) return;
+            e.preventDefault();
+
+            const touch = e.type === 'touchmove' ? e.touches[0] : e;
+            const deltaX = touch.clientX - startX;
+            const isRightPage = currentPage.data('page-number') % 2 === 0;
+            
+            // Calculate drag progress (0 to 1)
+            const maxDrag = 100;
+            const progress = Math.min(Math.abs(deltaX) / maxDrag, 1);
+            
+            // Apply rotation
+            const angle = isRightPage ? -progress * 180 : progress * 180;
+            currentPage.css({
+                transform: `rotateY(${angle}deg)`,
+                transformOrigin: isRightPage ? 'right center' : 'left center',
+                zIndex: 1000
+            });
+
+            // Add shadow effect
+            const shadowIntensity = Math.sin(progress * Math.PI) * 0.5;
+            currentPage.css({
+                'box-shadow': `${isRightPage ? '' : '-'}${shadowIntensity * 20}px 0 15px rgba(0,0,0,${shadowIntensity})`
+            });
+        });
+
+        // End drag handling
+        $(document).on('mouseup touchend', function(e) {
+            if (!isDragging || !currentPage) return;
+            
+            const touch = e.type === 'touchend' ? 
+                (e.changedTouches ? e.changedTouches[0].clientX : startX) : e.clientX;
+            
+            const deltaX = touch - startX;
+            const threshold = 50;
+            const isRightPage = currentPage.data('page-number') % 2 === 0;
+
+            // Complete the turn if dragged far enough
+            if (Math.abs(deltaX) > threshold) {
+                if ((isRightPage && deltaX < 0) || (!isRightPage && deltaX > 0)) {
+                    book.turn('next');
+                } else {
+                    book.turn('previous');
+                }
+            }
+
+            // Reset styles
+            currentPage.css({
+                transform: '',
+                transformOrigin: '',
+                boxShadow: '',
+                zIndex: ''
+            });
+
+            currentPage.removeClass('dragging');
+            isDragging = false;
+            currentPage = null;
+        });
     }
 
     updatePageInfo(currentPage) {
@@ -495,30 +523,61 @@ class PDFViewer {
         }
     }
 
-    enhancePageTurn(pageEl, corner) {
-        const content = pageEl.find('.page-content');
+    async addPage(pageNum) {
+        const page = await this.currentPDF.getPage(pageNum);
+        const viewport = page.getViewport({ scale: this.scale });
         
-        // Ensure content stays fixed during turn
-        content.css({
-            'transform': 'translateZ(0)',
-            'backface-visibility': 'hidden',
-            'will-change': 'transform'
+        const canvas = document.createElement('canvas');
+        canvas.className = 'pdf-page';
+        
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = viewport.width * pixelRatio;
+        canvas.height = viewport.height * pixelRatio;
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        
+        const context = canvas.getContext('2d', {
+            alpha: false,
+            willReadFrequently: false
         });
+        
+        context.scale(pixelRatio, pixelRatio);
+        
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport,
+            enableWebGL: true,
+            renderInteractiveForms: false,
+            textLayer: false
+        };
+
+        await page.render(renderContext).promise;
+
+        // Store the rendered page
+        this.pageContents.set(pageNum, canvas);
+        this.loadedPages.add(pageNum);
+
+        // Update page element
+        const pageElement = document.querySelector(`.page-wrapper[data-page-number="${pageNum}"]`);
+        if (pageElement) {
+            pageElement.classList.remove('loading');
+            const content = pageElement.querySelector('.page-content');
+            content.innerHTML = '';
+            content.appendChild(canvas);
+        }
     }
 
-    updateShadowEffects(book, page) {
-        const currentPage = book.find(`.page-wrapper[data-page-number="${page}"]`);
-        const prevPage = currentPage.prev('.page-wrapper');
-        const nextPage = currentPage.next('.page-wrapper');
+    async preloadAdjacentPages(pageNum) {
+        const adjacentPages = this.getNextPages(pageNum, this.pageLoadBuffer);
+        await this.preloadPages(adjacentPages);
+    }
+
+    async preloadPages(pages) {
+        const loadPromises = pages
+            .filter(pageNum => !this.loadedPages.has(pageNum))
+            .map(pageNum => this.addPage(pageNum));
         
-        // Add dynamic shadows based on turn direction
-        if (page % 2 === 0) {
-            prevPage.find('.shadow-right').css('opacity', '0.8');
-            currentPage.find('.shadow-left').css('opacity', '0.4');
-        } else {
-            currentPage.find('.shadow-right').css('opacity', '0.4');
-            nextPage.find('.shadow-left').css('opacity', '0.8');
-        }
+        await Promise.all(loadPromises);
     }
 
     getNextPages(currentPage, buffer) {
@@ -536,109 +595,16 @@ class PDFViewer {
         return Array.from(pages);
     }
 
-    async preloadPages(pages) {
-        const loadPromises = pages
-            .filter(pageNum => !this.loadedPages.has(pageNum))
-            .map(pageNum => this.addPage(pageNum));
-        
-        await Promise.all(loadPromises);
-    }
-
-    initializeInteraction(book) {
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
-        let currentX = 0;
-        let currentY = 0;
-        let cornerDragging = false;
-        
-        const getCornerArea = (e, pageWrapper) => {
-            const rect = pageWrapper[0].getBoundingClientRect();
-            const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            const cornerSize = 100; // Size of corner area
-            
-            // Check if we're in any corner
-            const isTopRight = x >= rect.right - cornerSize && y <= rect.top + cornerSize;
-            const isTopLeft = x <= rect.left + cornerSize && y <= rect.top + cornerSize;
-            const isBottomRight = x >= rect.right - cornerSize && y >= rect.bottom - cornerSize;
-            const isBottomLeft = x <= rect.left + cornerSize && y >= rect.bottom - cornerSize;
-            
-            if (isTopRight) return 'tr';
-            if (isTopLeft) return 'tl';
-            if (isBottomRight) return 'br';
-            if (isBottomLeft) return 'bl';
-            return null;
-        };
-
-        const handleDragStart = (e) => {
-            if (this.isAnimating) return;
-            
-            const pageWrapper = $(e.currentTarget).closest('.page-wrapper');
-            const corner = getCornerArea(e, pageWrapper);
-            
-            if (corner) {
-                e.preventDefault();
-                isDragging = true;
-                cornerDragging = true;
-                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-                
-                const pageNum = parseInt(pageWrapper.data('page-number'));
-                book.turn('page', pageNum);
-                
-                // Add visual feedback
-                pageWrapper.addClass('corner-drag');
-            }
-        };
-
-        const handleDragMove = (e) => {
-            if (!isDragging || !cornerDragging) return;
-            
-            e.preventDefault();
-            currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            currentY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            
-            const deltaX = currentX - startX;
-            const deltaY = currentY - startY;
-            
-            // Calculate drag progress (0 to 1)
-            const dragProgress = Math.min(Math.abs(deltaX) / 200, 1);
-            
-            // Update page fold based on drag
-            book.turn('progress', dragProgress);
-        };
-
-        const handleDragEnd = (e) => {
-            if (!isDragging) return;
-            
-            const deltaX = currentX - startX;
-            const threshold = 50; // Minimum drag distance to trigger page turn
-            
-            if (Math.abs(deltaX) > threshold) {
-                // Complete the turn
-                book.turn('next');
-            } else {
-                // Revert the turn
-                book.turn('previous');
-            }
-            
-            isDragging = false;
-            cornerDragging = false;
-            $('.page-wrapper').removeClass('corner-drag');
-        };
-
-        // Add event listeners for both touch and mouse events
-        book.on('mousedown touchstart', '.page-wrapper', handleDragStart);
-        $(document).on('mousemove touchmove', handleDragMove);
-        $(document).on('mouseup touchend', handleDragEnd);
-        
-        // Clean up function
-        this.cleanupInteraction = () => {
-            book.off('mousedown touchstart', '.page-wrapper', handleDragStart);
-            $(document).off('mousemove touchmove', handleDragMove);
-            $(document).off('mouseup touchend', handleDragEnd);
-        };
+    getPageView(pageNum) {
+        const view = [];
+        if (pageNum % 2 === 0) {
+            view.push(pageNum - 1);
+            view.push(pageNum);
+        } else {
+            view.push(pageNum);
+            view.push(pageNum + 1);
+        }
+        return view;
     }
 }
 

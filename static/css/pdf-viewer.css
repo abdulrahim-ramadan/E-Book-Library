@@ -17,7 +17,7 @@
     background: #fff;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     transform-style: preserve-3d;
-    perspective: 2500px;
+    perspective: 2000px;
     position: relative;
     overflow: hidden;
     margin: 0 auto;
@@ -156,6 +156,7 @@
     transition: opacity 0.3s ease-in-out;
     pointer-events: none;
     aspect-ratio: 0.707; /* Single page aspect ratio (A4) */
+    background: #fff;
 }
 
 .pdf-page {
@@ -303,58 +304,149 @@
 }
 
 /* Enhanced Turn.js specific styles */
-#book .turn-page {
-    background-color: white !important;
-    background-size: 100% 100% !important;
-    backface-visibility: hidden;
-    position: absolute !important;
+#book {
+    perspective: 2000px;
 }
 
-.turn-page-wrapper {
-    perspective: 2500px;
+.page-wrapper {
     transform-style: preserve-3d;
-    position: absolute !important;
+    backface-visibility: hidden;
 }
 
-.page-wrapper.turning .flip-container {
-    pointer-events: none;
+.page-content {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
-.page-wrapper.turning .page-content {
-    pointer-events: none;
-    transform: translateZ(0) !important;
-}
-
-.page-wrapper.odd .page-content {
-    transform-origin: 100% 50% !important;
-}
-
-.page-wrapper.even .page-content {
-    transform-origin: 0% 50% !important;
-}
-
-/* Hard cover effect */
-.hard {
-    background: #f0f0f0 !important;
+/* Page corner interaction */
+.page-corner {
     position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    box-shadow: 
-        inset 0 0 30px rgba(0,0,0,0.1),
-        0 1px 3px rgba(0,0,0,0.2);
-    border-radius: 2px;
+    bottom: 0;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    z-index: 1000;
+    background: transparent;
+    transition: background 0.3s;
+}
+
+.page-corner::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    opacity: 1;
+}
+
+/* Right page corner */
+.page-wrapper:nth-child(odd) .page-corner {
+    right: 0;
+}
+
+.page-wrapper:nth-child(odd) .page-corner::before {
+    right: 0;
+    border-width: 0 0 120px 120px;
+    border-color: transparent transparent rgba(0,0,0,0.1) transparent;
+    transition: border-color 0.3s;
+}
+
+/* Left page corner */
+.page-wrapper:nth-child(even) .page-corner {
+    left: 0;
+}
+
+.page-wrapper:nth-child(even) .page-corner::before {
+    left: 0;
+    border-width: 120px 120px 0 0;
+    border-color: rgba(0,0,0,0.1) transparent transparent transparent;
+    transition: border-color 0.3s;
+}
+
+/* Hover effects */
+.page-wrapper:nth-child(odd) .page-corner:hover::before {
+    border-color: transparent transparent rgba(0,0,0,0.2) transparent;
+}
+
+.page-wrapper:nth-child(even) .page-corner:hover::before {
+    border-color: rgba(0,0,0,0.2) transparent transparent transparent;
+}
+
+/* Dragging state */
+.page-corner.dragging {
+    cursor: grabbing;
+}
+
+.page-wrapper.dragging {
+    pointer-events: none;
+    will-change: transform;
+}
+
+.page-wrapper.dragging .page-content {
+    transition: none !important;
+}
+
+/* Enhanced 3D effects */
+
+.page-content {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.3s ease-out;
 }
 
 /* Loading state */
-.page-wrapper.loading .page-content {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+.page-wrapper.loading .page-corner {
+    display: none;
 }
 
-.page-wrapper.loading .spinner {
-    display: block;
+/* Visual feedback for corners */
+.page-corner::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    opacity: 0.7;
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: opacity 0.3s;
+}
+
+.page-wrapper:nth-child(odd) .page-corner::after {
+    right: 10px;
+    bottom: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>');
+}
+
+.page-wrapper:nth-child(even) .page-corner::after {
+    left: 10px;
+    bottom: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>');
+}
+
+.page-corner:hover::after {
     opacity: 1;
+}
+
+/* Book shadow effect */
+.page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 1;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+}
+
+.page-wrapper:nth-child(odd)::before {
+    left: 0;
+}
+
+.page-wrapper:nth-child(even)::before {
+    right: 0;
+    transform: scaleX(-1);
 }
 
 .pdf-loading {
