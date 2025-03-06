@@ -1,0 +1,33 @@
+{% load static %}
+<!--==================== SEARCH ====================-->
+<div class="search section">
+    <form action="{% url 'books:home' %}" method="GET" class="search__form">
+        <i class="ri-search-line search__icon"></i>
+        <input type="text" name="q" placeholder="ابحث عن كتاب..." class="search__input" value="{{ query|default:'' }}">
+        <button type="submit" class="search__button">بحث</button>
+    </form>
+
+    {% if query %}
+    <div class="search__results container">
+        <h2 class="section__title">نتائج البحث عن: {{ query }}</h2>
+        {% if search_results %}
+            <div class="featured__container">
+                <div class="featured__swiper swiper">
+                    <div class="swiper-wrapper">
+                        {% for book in search_results %}
+                        <article class="featured__card swiper-slide">
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="featured__img">
+                            <h2 class="featured__title">{{ book.title }}</h2>
+                            <div class="featured__prices"></div>
+                            <button class="button" onclick="window.open('{% url 'books:serve_pdf' book.id %}', '_blank')">انقر هنا للقراءة</button>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center">لم يتم العثور على نتائج</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

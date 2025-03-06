@@ -1,0 +1,33 @@
+{% load static %}
+<!--==================== NEW BOOKS ====================-->
+<section class="new section" id="new">
+    <h2 class="section__title">
+        ‏تقييمات الكتب
+    </h2>
+
+    <div class="new__container container">
+        <div class="new__swiper swiper">
+            <div class="swiper-wrapper">
+                {% for book in review_books %}
+                <a href="#" class="new__card swiper-slide">
+                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="new__img">
+                    <div>
+                        <h2 class="new__title">{{ book.title }}</h2>
+                        <div class="new__prices"></div>
+                        <div class="new__stars">
+                            {% with ''|center:book.rating|make_list as stars %}
+                            {% for _ in stars %}
+                            <i class="ri-star-fill"></i>
+                            {% endfor %}
+                            {% if book.rating|floatformat:1|slice:"-2:" == '.5' %}
+                            <i class="ri-star-half-fill"></i>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>

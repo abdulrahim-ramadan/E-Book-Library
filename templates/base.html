@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--=============== FAVICON ===============-->
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
+
+    <!--=============== REMIXICONS ===============-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css">
+
+    <!--=============== PDF VIEWER ===============-->
+    <link rel="stylesheet" href="{% static 'css/pdf-viewer.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    
+    <!-- PDF.js with proper version and worker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        // Initialize PDF.js worker before any other PDF code
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+
+    <!--=============== SWIPER CSS ===============-->
+    <link rel="stylesheet" href="{% static 'css/swiper-bundle.min.css' %}">
+
+    <!--=============== CSS ===============-->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <title>{% block title %}موقع الاستاذ محمد عطا رمضان{% endblock %}</title>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- start container -->
+    <div class="container py-4">
+        <div class="row py-3">
+            <div class="col-lg-6">
+                <div class="home__container container grid">
+                    <p class="fw-normal text-secondary"></p>
+                </div>
+                <div style="position: relative; width: 100%; height: 100%;">
+                    <img src="{% static 'img/cv1.jpg' %}" alt="الصورة" style="width: 100%; height: auto;">
+                    <button class="button pdf-view-button" data-pdf-url="{% static 'pdf/Ramadan.pdf' %}" 
+                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        أهلاً رمضان
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end container -->
+
+    {% include 'includes/header.html' %}
+    {% include 'includes/search.html' %}
+
+    <!--==================== MAIN ====================-->
+    <main class="main">
+        {% block content %}
+            {% include 'includes/home.html' %}
+            {% include 'includes/featured.html' %}
+
+            <!--==================== DISCOUNT ====================-->
+            <section class="discount section" id="discount">
+                <div class="discount__container container grid">
+                    <div class="discount__data">
+                        <h2 class="discount__title section__title">
+                            اكتشف مجموعة من أروع الكتب الإسلامية التي تثري معرفتك وتنير دربك 
+                        </h2>
+
+                        <p class="discount__description">
+                            احصل على أفضل الإصدارات من كبار العلماء والمفكرين. الآن فرصتك للغوص في بحار العلم والروحانية
+                        </p>
+                        <a href="https://www.facebook.com/ramadan1965?mibextid=ZbWKwL" class="button">الحقوق والواجبات الزوجية في الإسلام - متابعة  </a>
+                    </div>
+
+                    <div class="discount__images">
+                        <img src="{% static 'img/discount-book-1.png' %}" alt="" class="discount__img-1">
+                        <img src="{% static 'img/discount-book-2.png' %}" alt="" class="discount__img-2">
+                    </div>
+                </div>
+            </section>
+
+            {% include 'includes/reviews.html' %}
+        {% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+    <!--========== SCROLL UP ==========-->
+    <a href="#" class="scrollup" id="scroll-up">
+        <i class="ri-arrow-up-line"></i>
+    </a>
+
+    <!--=============== SCROLLREVEAL ===============-->
+    <script src="{% static 'js/scrollreveal.min.js' %}"></script>
+
+    <!--=============== SWIPER JS ===============-->
+    <script src="{% static 'js/swiper-bundle.min.js' %}"></script>
+
+    <!--=============== MAIN JS ===============-->
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/pdf-viewer.js' %}"></script>
+
+    <script>
+        // Initialize PDF viewer
+        const pdfViewer = new PDFViewer();
+        
+        // Initialize PDF viewer for all buttons with pdf-view-button class
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle PDF view buttons
+            document.querySelectorAll('.pdf-view-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pdfUrl = this.getAttribute('data-pdf-url');
+                    if (pdfUrl) {
+                        pdfViewer.init(pdfUrl);
+                    }
+                });
+            });
+
+            // Initialize Swiper for featured books
+            let swiperFeatured = new Swiper('.featured__swiper', {
+                loop: true,
+                spaceBetween: 16,
+                grabCursor: true,
+                slidesPerView: 'auto',
+                centeredSlides: 'auto',
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    1150: {
+                        slidesPerView: 3,
+                        centeredSlides: false,
+                    },
+                },
+            });
+        });
+    </script>
+</body>
+</html>
