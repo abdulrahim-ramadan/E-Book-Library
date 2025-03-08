@@ -1,0 +1,475 @@
+.pdf-viewer-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    direction: rtl;
+    overflow: hidden;
+}
+
+#book {
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transform-style: preserve-3d;
+    perspective: 2000px;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    transform-origin: center center;
+    aspect-ratio: 1.414; /* Standard A4 aspect ratio */
+}
+
+.page-wrapper {
+    perspective: 2500px;
+    transform-style: preserve-3d;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    float: right; /* For RTL support */
+    transform-origin: center center;
+    aspect-ratio: 0.707; /* Single page aspect ratio (A4) */
+    cursor: default;
+}
+
+/* Corner hover effects */
+.page-wrapper::before,
+.page-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Top right corner */
+.page-wrapper::before {
+    top: 0;
+    right: 0;
+    background: radial-gradient(circle at top right, 
+        rgba(0,0,0,0.1) 0%, 
+        rgba(0,0,0,0) 70%);
+}
+
+/* Bottom right corner */
+.page-wrapper::after {
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(circle at bottom right, 
+        rgba(0,0,0,0.1) 0%, 
+        rgba(0,0,0,0) 70%);
+}
+
+/* Left corners for RTL */
+.page-wrapper.odd::before {
+    top: 0;
+    left: 0;
+    right: auto;
+    background: radial-gradient(circle at top left, 
+        rgba(0,0,0,0.1) 0%, 
+        rgba(0,0,0,0) 70%);
+}
+
+.page-wrapper.odd::after {
+    bottom: 0;
+    left: 0;
+    right: auto;
+    background: radial-gradient(circle at bottom left, 
+        rgba(0,0,0,0.1) 0%, 
+        rgba(0,0,0,0) 70%);
+}
+
+/* Show corner effects on hover */
+.page-wrapper:hover::before,
+.page-wrapper:hover::after {
+    opacity: 1;
+}
+
+/* Corner drag state */
+.page-wrapper.corner-drag {
+    cursor: grabbing !important;
+}
+
+.page-wrapper.corner-drag::before,
+.page-wrapper.corner-drag::after {
+    opacity: 1;
+    background: radial-gradient(circle at center, 
+        rgba(0,0,0,0.2) 0%, 
+        rgba(0,0,0,0) 70%);
+}
+
+/* Enhanced shadow effects during drag */
+.page-wrapper.corner-drag .shadow-right,
+.page-wrapper.corner-drag .shadow-left {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+/* Corner cursor indicators */
+.page-wrapper:hover {
+    cursor: grab;
+}
+
+.page-wrapper.turning {
+    cursor: grabbing;
+}
+
+/* Ensure content stays fixed during drag */
+.page-wrapper.corner-drag .page-content {
+    pointer-events: none;
+    user-select: none;
+    transform: translateZ(0) !important;
+}
+
+.flip-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transform-origin: center center;
+}
+
+.page-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+    aspect-ratio: 0.707; /* Single page aspect ratio (A4) */
+    background: #fff;
+}
+
+.pdf-page {
+    width: auto;
+    height: 100%;
+    display: block;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    object-fit: contain;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pdf-viewer-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10001;
+}
+
+.pdf-nav {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 10001;
+}
+
+.pdf-nav button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.pdf-nav button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.page-info {
+    color: #fff;
+    font-size: 14px;
+}
+
+.pdf-zoom-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10001;
+}
+
+.pdf-zoom-controls button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.pdf-zoom-controls button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Enhanced page flip styling */
+
+.page-wrapper.first .page,
+.page-wrapper.last .page {
+    position: relative;
+}
+
+.page-wrapper.first .page:before,
+.page-wrapper.last .page:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0));
+    z-index: 100;
+}
+
+.page-wrapper.first .page:before {
+    right: 0;
+}
+
+.page-wrapper.last .page:before {
+    left: 0;
+}
+
+/* Enhanced shadow effects */
+.shadow-left,
+.shadow-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+    z-index: 5;
+}
+
+.shadow-left {
+    background: linear-gradient(to right, 
+        rgba(0,0,0,0.2) 0%,
+        rgba(0,0,0,0.1) 20%,
+        rgba(0,0,0,0) 100%);
+    left: 0;
+}
+
+.shadow-right {
+    background: linear-gradient(to left, 
+        rgba(0,0,0,0.2) 0%,
+        rgba(0,0,0,0.1) 20%,
+        rgba(0,0,0,0) 100%);
+    right: 0;
+}
+
+.page-wrapper.turning .shadow-left,
+.page-wrapper.turning .shadow-right {
+    opacity: 1;
+}
+
+/* Enhanced Turn.js specific styles */
+#book {
+    perspective: 2000px;
+}
+
+.page-wrapper {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.page-content {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+/* Page corner interaction */
+.page-corner {
+    position: absolute;
+    bottom: 0;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    z-index: 1000;
+    background: transparent;
+    transition: background 0.3s;
+}
+
+.page-corner::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    opacity: 1;
+}
+
+/* Right page corner */
+.page-wrapper:nth-child(odd) .page-corner {
+    right: 0;
+}
+
+.page-wrapper:nth-child(odd) .page-corner::before {
+    right: 0;
+    border-width: 0 0 120px 120px;
+    border-color: transparent transparent rgba(0,0,0,0.1) transparent;
+    transition: border-color 0.3s;
+}
+
+/* Left page corner */
+.page-wrapper:nth-child(even) .page-corner {
+    left: 0;
+}
+
+.page-wrapper:nth-child(even) .page-corner::before {
+    left: 0;
+    border-width: 120px 120px 0 0;
+    border-color: rgba(0,0,0,0.1) transparent transparent transparent;
+    transition: border-color 0.3s;
+}
+
+/* Hover effects */
+.page-wrapper:nth-child(odd) .page-corner:hover::before {
+    border-color: transparent transparent rgba(0,0,0,0.2) transparent;
+}
+
+.page-wrapper:nth-child(even) .page-corner:hover::before {
+    border-color: rgba(0,0,0,0.2) transparent transparent transparent;
+}
+
+/* Dragging state */
+.page-corner.dragging {
+    cursor: grabbing;
+}
+
+.page-wrapper.dragging {
+    pointer-events: none;
+    will-change: transform;
+}
+
+.page-wrapper.dragging .page-content {
+    transition: none !important;
+}
+
+/* Enhanced 3D effects */
+
+.page-content {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.3s ease-out;
+}
+
+/* Loading state */
+.page-wrapper.loading .page-corner {
+    display: none;
+}
+
+/* Visual feedback for corners */
+.page-corner::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    opacity: 0.7;
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: opacity 0.3s;
+}
+
+.page-wrapper:nth-child(odd) .page-corner::after {
+    right: 10px;
+    bottom: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>');
+}
+
+.page-wrapper:nth-child(even) .page-corner::after {
+    left: 10px;
+    bottom: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>');
+}
+
+.page-corner:hover::after {
+    opacity: 1;
+}
+
+/* Book shadow effect */
+.page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 1;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+}
+
+.page-wrapper:nth-child(odd)::before {
+    left: 0;
+}
+
+.page-wrapper:nth-child(even)::before {
+    right: 0;
+    transform: scaleX(-1);
+}
+
+.pdf-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 10002;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}

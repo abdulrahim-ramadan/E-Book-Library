@@ -1,0 +1,56 @@
+/* Custom Admin Styles */
+.field-rating_stars {
+    white-space: nowrap;
+    font-size: 1.2em;
+}
+
+/* Improve fieldset appearance */
+.module h2, .module caption {
+    background: #2c3e50 !important;
+    color: white !important;
+}
+
+/* Enhance list display */
+#changelist-form .results {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Better image preview */
+.field-cover_preview img {
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.field-cover_preview img:hover {
+    transform: scale(1.1);
+}
+
+/* PDF preview link styling */
+.field-pdf_preview a {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #3498db;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.field-pdf_preview a:hover {
+    background: #2980b9;
+}
+
+/* Rating stars color */
+.field-rating_stars span {
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 767px) {
+    .field-cover_preview img {
+        max-width: 100%;
+        height: auto;
+    }
+}

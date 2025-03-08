@@ -1,0 +1,39 @@
+{% load static %}
+<!--==================== HOME ====================-->
+<section class="home section" id="home">
+    <div class="home__container container grid">
+        <div class="home__data">
+            <h1 class="home__title">
+                أهلا بكم في موقع الأستاذ محمد عطا رمضان
+            </h1>
+
+            <p class="home__description">
+                اكتشف عالمًا من المعرفة بين يديك، مع مئات الكتب الإسلامية المتنوعة التي تلبي اهتماماتك وتعزز فهمك.                     
+            </p>
+
+            <button class="button" onclick="window.open('{% static 'pdf/cv.pdf' %}', '_blank')">السيرة الذاتية</button>
+        </div>
+
+        <div class="home__images">
+            <div class="home__swiper swiper">
+                <div class="swiper-wrapper">
+                    <article class="home__article swiper-slide">
+                        <img src="{% static 'img/home-book-1.png' %}" alt="image" class="home__img">
+                    </article>
+
+                    <article class="home__article swiper-slide">
+                        <img src="{% static 'img/home-book-2.png' %}" alt="image" class="home__img">
+                    </article>
+
+                    <article class="home__article swiper-slide">
+                        <img src="{% static 'img/home-book-3.png' %}" alt="image" class="home__img">
+                    </article>
+
+                    <article class="home__article swiper-slide">
+                        <img src="{% static 'img/home-book-4.png' %}" alt="image" class="home__img">
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

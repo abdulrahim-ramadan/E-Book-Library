@@ -1,0 +1,54 @@
+{% load static %}
+<!--==================== FEATURED =====================-->
+<section class="featured section" id="featured">
+    <h2 class="section__title">
+        كتب جديدة 
+        <span class="section__subtitle">أحدث الإصدارات في مكتبتنا</span>
+    </h2>
+
+    <div class="featured__container container">
+        <div class="featured__swiper swiper">
+            <div class="swiper-wrapper">
+                {% for book in featured_books %}
+                <article class="featured__card swiper-slide">
+                    <div class="featured__img-wrapper">
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="featured__img">
+                        {% if book.rating %}
+                        <div class="featured__rating">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= book.rating %}
+                                    <i class="ri-star-fill"></i>
+                                {% else %}
+                                    <i class="ri-star-line"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="featured__data">
+                        <h2 class="featured__title">{{ book.title }}</h2>
+                        <span class="featured__author">{{ book.author }}</span>
+                        {% if book.description %}
+                        <p class="featured__description">{{ book.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="featured__actions">
+                            <button class="button featured__button pdf-view-button" data-pdf-url="{% url 'books:serve_pdf' book.id %}">
+                                <i class="ri-book-open-line"></i> اقرأ الكتاب
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            <div class="swiper-button-prev">
+                <i class="ri-arrow-left-s-line"></i>
+            </div>
+
+            <div class="swiper-button-next">
+                <i class="ri-arrow-right-s-line"></i>
+            </div>
+        </div>
+    </div>
+</section>

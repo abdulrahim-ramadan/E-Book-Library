@@ -476,84 +476,149 @@ body.dark-theme {
 }
 
 /*=============== FEATURED ===============*/
-.featured__card {
-  position: relative;
-  text-align: center;
-  background-color: var(--container-color);
-  padding: 2rem;
-  overflow: hidden;
-  border: 2px solid var(--border-color);
-  transition: border .4s, background-color .4s;
-}
-
-.featured__img {
-  width: 150px;
-  margin: 0 auto .75rem;
+.featured__container {
+    padding-block: 2rem;
 }
 
 .featured__title {
-  font-size: var(--h2-font-size);
-  margin-bottom: .5rem;
+    font-size: var(--h3-font-size);
+    font-weight: var(--font-bold);
+    margin-bottom: .75rem;
 }
 
-.featured__prices {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  column-gap: .75rem;
-  margin-bottom: 1.25rem;
+.section__subtitle {
+    display: block;
+    font-size: var(--small-font-size);
+    color: var(--text-color-light);
+    margin-top: .25rem;
 }
 
-.featured__discount {
-  color: var(--title-color);
+.featured__img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f8f9fa;
 }
 
-.featured__price {
-  font-size: var(--small-font-size);
-  text-decoration: line-through;
+.featured__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transition: transform 0.3s ease;
 }
 
-.featured__card .button {
-  cursor: pointer;
+.featured__card:hover .featured__img {
+    transform: scale(1.1);
+}
+
+.featured__rating {
+    position: absolute;
+    bottom: .5rem;
+    right: .5rem;
+    background: rgba(0, 0, 0, .5);
+    padding: .5rem;
+    border-radius: .5rem;
+    display: flex;
+    gap: .25rem;
+}
+
+.featured__rating i {
+    color: var(--yellow-color);
+    font-size: 1rem;
+}
+
+.featured__data {
+    padding: 1rem;
+    background: var(--container-color);
+    border-radius: 1rem;
+    text-align: right;
+}
+
+.featured__author {
+    display: block;
+    font-size: var(--small-font-size);
+    color: var(--text-color-light);
+    margin-bottom: .75rem;
+}
+
+.featured__description {
+    font-size: var(--smaller-font-size);
+    margin-bottom: 1rem;
 }
 
 .featured__actions {
-  display: inline-flex;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.featured__button {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+}
+
+.featured__button i {
+    font-size: 1.25rem;
+}
+
+.featured__card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  height: 100%;
+  display: flex;
   flex-direction: column;
-  row-gap: .75rem;
-  position: absolute;
-  top: 2rem;
-  right: -1.5rem;
-  transition: right .4s;
-}
-
-.featured__actions button {
-  background: none;
-  font-size: 1.25rem;
-  color: var(--first-color);
-  cursor: pointer;
-}
-
-.featured__card:hover .featured__actions {
-  right: 1.5rem;
+  padding: 1rem;
 }
 
 /* Swiper class */
-.swiper-button-prev::after,
-.swiper-button-next::after {
-  content: "";
+.featured__container .swiper-button-prev::after,
+.featured__container .swiper-button-next::after {
+    content: '';
 }
 
-.swiper-button-prev,
-.swiper-button-next {
-  width: initial;
-  height: initial;
-  background-color: var(--container-color);
-  border: 2px solid var(--border-color);
-  padding: .5rem;
-  font-size: 1.5rem;
-  color: var(--first-color);
-  transition: border .4s, background-color .4s;
+.featured__container .swiper-button-prev,
+.featured__container .swiper-button-next {
+    width: initial;
+    height: initial;
+    background-color: var(--container-color);
+    border-radius: 50%;
+    padding: 6px;
+    opacity: .7;
+    transition: opacity .4s;
+}
+
+.featured__container .swiper-button-prev:hover,
+.featured__container .swiper-button-next:hover {
+    opacity: 1;
+}
+
+.featured__container .swiper-button-prev {
+    left: 1rem;
+}
+
+.featured__container .swiper-button-next {
+    right: 1rem;
+}
+
+.featured__container .swiper-button-prev i,
+.featured__container .swiper-button-next i {
+    font-size: 1.5rem;
+    color: var(--title-color);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .featured__img-wrapper {
+        height: 300px;
+    }
 }
 
 /*=============== DISCOUNT ===============*/
@@ -695,13 +760,10 @@ body.dark-theme {
   
 }
 
-
-
 .testimonial__img {
   width: 100px;
   border-radius: 50%;
   margin: 0 auto 1.5rem;
-  
 }
 
 .testimonial__title {
@@ -1087,11 +1149,6 @@ body.dark-theme {
   }
 }
 
-
-
-
-
-
 body{
   font-family: 'Poppins', sans-serif;
 }
@@ -1125,8 +1182,3 @@ transition: .3s ease-in-out;
   -webkit-filter: blur(0);
 filter: blur(0);
 }
-
-
-
-
-

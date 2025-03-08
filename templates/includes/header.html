@@ -1,0 +1,35 @@
+{% load static %}
+<!--==================== HEADER ====================-->
+<header class="header" id="header">
+    <nav class="nav container">
+        <div class="nav__menu">
+            <ul class="nav__list">
+                <li class="nav__item">
+                    <a href="{% url 'books:home' %}" class="nav__link {% if request.resolver_match.url_name == 'home' %}active-link{% endif %}">
+                        <i class="ri-home-line"></i>
+                        <span>الصفحةالرئيسية </span>
+                    </a>
+                </li>
+
+                <li class="nav__item">
+                    <a href="{% url 'books:featured' %}" class="nav__link {% if request.resolver_match.url_name == 'featured' %}active-link{% endif %}">
+                        <i class="ri-book-3-line"></i>
+                        <span> كتب جديدة </span>
+                    </a>
+                </li>
+
+                <li class="nav__item">
+                    <a href="{% url 'books:reviews' %}" class="nav__link {% if request.resolver_match.url_name == 'reviews' %}active-link{% endif %}">
+                        <i class="ri-bookmark-line"></i>
+                        <span>‏تقييمات الكتب</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="nav_actions">
+            <!-- Theme button -->
+            <i class="ri-moon-line change-theme" id="theme-button"></i>
+        </div>
+    </nav>
+</header>
